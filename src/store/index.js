@@ -1,9 +1,10 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import moviesStore from './modules/moviesStore'
 
 Vue.use(Vuex)
 
-export default new Vuex.Store({
+const store = new Vuex.Store({
   state: {
   },
   mutations: {
@@ -11,5 +12,10 @@ export default new Vuex.Store({
   actions: {
   },
   modules: {
+    moviesStore
   }
 })
+
+store.dispatch('initMoviesStore')
+
+export default store
