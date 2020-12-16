@@ -1,11 +1,15 @@
 <template>
 <!-- List of movies -->
   <b-container>
-    <h3 class="list-title">IMDB Top</h3>
+    <h3 class="list-title">{{ listTitle }}</h3>
     <BRow>
       <template v-if="isExist">
         <BCol cols="3" v-for="(listMovie, id) in list" :key="id">
-          <MovieListItem :movie="listMovie" @mouseover.native="onMouseOver(listMovie.Poster)"></MovieListItem>
+          <MovieListItem
+          :movie="listMovie"
+          @mouseover.native="onMouseOver(listMovie.Poster)"
+          @removeItem="onRemoveItem"
+          ></MovieListItem>
         </BCol>
       </template>
       <template v-else>
@@ -16,6 +20,7 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
 import MovieListItem from './MoviesListItem'
 
 export default {
@@ -30,6 +35,10 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('moviesStore', ['isSearch']),
+    listTitle () {
+      return this.isSearch ? 'Search result' : 'IMDB Top'
+    },
     // Проверяем есть ли список
     isExist () {
       return Boolean(Object.keys(this.list).length)
@@ -37,8 +46,15 @@ export default {
   },
 
   methods: {
+    ...mapActions('moviesStore', ['removeMovie']),
     onMouseOver (poster) {
       this.$emit('changePoster', poster)
+    },
+    async onRemoveItem ({ id, title }) {
+      const isConfirmed = await this.$bvModal.msgBoxConfirm(`Are you sure ${title}?`)
+      if (isConfirmed) {
+        this.removeMovie(id)
+      }
     }
   }
 }

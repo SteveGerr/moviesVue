@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import moviesStore from './modules/moviesStore'
+import loader from './modules/loader'
+import notificationStore from '@/store/modules/notificationStore'
 
 Vue.use(Vuex)
 
@@ -12,7 +14,9 @@ const store = new Vuex.Store({
   actions: {
   },
   modules: {
-    moviesStore
+    moviesStore,
+    loader,
+    notificationStore
   }
 })
 

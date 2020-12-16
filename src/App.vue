@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <!-- передаём значение переменной в компонент -->
+    <Loader />
+    <Notification />
+    <Header />
     <poster-bg :poster="posterBg" />
     <movies-list :list="moviesList" @changePoster="onChangePoster" />
     <MoviesPagination
@@ -17,13 +19,19 @@ import { mapActions, mapGetters } from 'vuex'
 import MoviesList from '@/components/MoviesList'
 import PosterBg from './components/posterBG'
 import MoviesPagination from '@/components/MoviesPagination'
+import Loader from '@/components/Loader'
+import Header from './components/Header'
+import Notification from '@/components/Notification'
 
 export default {
   name: 'App',
   components: {
     MoviesList,
     PosterBg,
-    MoviesPagination
+    MoviesPagination,
+    Loader,
+    Header,
+    Notification
   },
 
   data () {
@@ -40,7 +48,12 @@ export default {
       this.posterBg = poster
     },
     onPageChanged (page) {
+      // Пушим в адресную строку название страницы 'page'
+      this.$router.push({ query: { page } })
       this.changeCurrentPage(page)
+    },
+    onPageQueryChange (query) {
+      console.log(query)
     }
   },
   computed: {
@@ -50,6 +63,13 @@ export default {
       'moviesPerPAge',
       'moviesLength'
     ])
+  },
+  watch: {
+    '$route.query': {
+      handler: 'onPageQueryChange',
+      immediate: true, // позволяет срабатывать после загрузки
+      deep: true // мониторит изменения внутри объекта
+    }
   }
 }
 </script>

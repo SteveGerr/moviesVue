@@ -9,7 +9,6 @@ function setParams (config) {
 }
 
 function returnData (res) {
-  console.log(res)
   // взвращаем сразу data
   return res.data
 }

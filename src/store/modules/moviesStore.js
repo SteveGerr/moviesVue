@@ -1,6 +1,7 @@
 import axios from '../../plugins/axios'
 import IDs from '../mock/imdb_top'
 import mutations from '@/store/mutations'
+// import { search } from 'core-js/fn/symbol'
 
 function serializeResponse (movies) {
   return movies.reduce((acc, movie) => {
@@ -12,10 +13,13 @@ function serializeResponse (movies) {
   }, {})
 }
 
-// Деструктурируем мутации и вытягиваем свойство MOVIES
-const { MOVIES, CURRENT_PAGE } = mutations
+// Деструктурируем мутации и вытягиваем свойствa
+const { MOVIES, CURRENT_PAGE, REMOVE_MOVIE, TOGGEL_SEARCH } = mutations
 
 const moviesStore = {
+  // НУжен, чтобы замкнуть данные и получать их только
+  // при указании имени стора, например
+  // ...mapActions('moviesStore', ['changeCurrentPage'])
   namespaced: true,
 
   state: {
@@ -24,7 +28,8 @@ const moviesStore = {
     moviesPerPAge: 12,
     // Текущая страница
     currentPage: 1,
-    movies: {}
+    movies: {},
+    isSearch: false
   },
   getters: {
     // ({ movies }) - деструктурируем state
@@ -35,7 +40,8 @@ const moviesStore = {
     // возварщает текущую страницу
     currentPage: ({ currentPage }) => currentPage,
     moviesPerPAge: ({ moviesPerPAge }) => moviesPerPAge,
-    moviesLength: ({ top }) => Object.keys(top).length
+    moviesLength: ({ top }) => Object.keys(top).length,
+    isSearch: ({ isSearch }) => isSearch
   },
   mutations: {
     [MOVIES] (state, value) {
@@ -44,6 +50,14 @@ const moviesStore = {
     // Изменение текущей страницы
     [CURRENT_PAGE] (state, value) {
       state.currentPage = value
+    },
+    [REMOVE_MOVIE] (state, index) {
+      // index - с какого индекса удалить
+      // 1 - кол-во элементов
+      state.top.splice(index, 1)
+    },
+    [TOGGEL_SEARCH] (state, bool) {
+      state.isSearch = bool
     }
   },
   actions: {
@@ -55,8 +69,11 @@ const moviesStore = {
       root: true
     },
 
-    async fetchMovies ({ getters, commit }) {
+    async fetchMovies ({ getters, commit, dispatch }) {
       try {
+        // dispatch будет вызывать экшн лоадера
+        // показываем лоадер
+        dispatch('toggleLoader', true, { root: true })
         const { currentPage, moviesPerPAge, slicedIDs } = getters
         // Получаем начальный индекс копирования массива
         const from = currentPage * moviesPerPAge - moviesPerPAge
@@ -76,12 +93,53 @@ const moviesStore = {
         commit('MOVIES', movies)
       } catch (error) {
         console.log(error)
+      } finally {
+        // Стопаем лоадер
+        // вызовется независимо от того, с ошибкой выполнилась функция или нет
+        dispatch('toggleLoader', false, { root: true })
       }
     },
     // Меняем текущую страницу
     changeCurrentPage ({ commit, dispatch }, page) {
       commit(CURRENT_PAGE, page)
       dispatch('fetchMovies')
+    },
+    removeMovie ({ commit, dispatch, state }, id) {
+      // Сравниваем текущий Id фильма, с тем, что пришёл в id
+      // Ежели такой id найдётся, нам вернётся его индекс в массиве
+      const index = state.top.findIndex(item => item === id)
+      if (index !== -1) {
+        commit(REMOVE_MOVIE, index)
+        dispatch('fetchMovies')
+      }
+    },
+    async searchMovie ({ dispatch, commit }, query) {
+      try {
+        dispatch('toggleLoader', true, { root: true })
+
+        const response = await axios.get(`/?s=${query}`)
+
+        if (response.Error) {
+          throw Error(response.Error)
+        }
+        const movies = serializeResponse(response.Search)
+        commit('MOVIES', movies)
+
+        console.log(response)
+      } catch (error) {
+        console.log(error)
+
+        dispatch('showNotify', {
+          msg: error.message,
+          title: 'Error',
+          variant: 'danger'
+        }, { root: true })
+      } finally {
+        dispatch('toggleLoader', false, { root: true })
+      }
+    },
+    toggleSearchState ({ commit }, bool) {
+      commit(TOGGEL_SEARCH, bool)
     }
   },
   modules: {}
