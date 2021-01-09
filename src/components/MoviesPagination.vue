@@ -53,6 +53,9 @@ export default {
   justify-content: center;
   background: #00008b42;
 }
+.movies-pagination {
+  margin-top: auto;
+}
 .movies-pagination >>> .pagination .page-item .page-link {
   background-color: transparent;
   font-size: 12px;

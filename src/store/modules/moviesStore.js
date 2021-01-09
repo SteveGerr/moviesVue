@@ -17,7 +17,7 @@ function serializeResponse (movies) {
 const { MOVIES, CURRENT_PAGE, REMOVE_MOVIE, TOGGEL_SEARCH } = mutations
 
 const moviesStore = {
-  // НУжен, чтобы замкнуть данные и получать их только
+  // namespaced нужен, чтобы замкнуть данные и получать их только
   // при указании имени стора, например
   // ...mapActions('moviesStore', ['changeCurrentPage'])
   namespaced: true,
@@ -62,12 +62,12 @@ const moviesStore = {
   },
   actions: {
     // Позволяет вызывать экшоны глобально, во время загрузки
-    initMoviesStore: {
-      handler ({ dispatch }) {
-        dispatch('fetchMovies')
-      },
-      root: true
-    },
+    // initMoviesStore: {
+    //   handler ({ dispatch }) {
+    //     dispatch('fetchMovies')
+    //   },
+    //   root: true
+    // },
 
     async fetchMovies ({ getters, commit, dispatch }) {
       try {

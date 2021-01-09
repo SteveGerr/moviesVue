@@ -52,8 +52,8 @@ export default {
       this.$router.push({ query: { page } })
       this.changeCurrentPage(page)
     },
-    onPageQueryChange (query) {
-      console.log(query)
+    onPageQueryChange ({ page = 1 }) {
+      this.changeCurrentPage(Number(page))
     }
   },
   computed: {
@@ -76,7 +76,10 @@ export default {
 
 <style>
 #app {
+  display: flex;
+  flex-direction: column;
   position: relative;
+  min-height: 100vh;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

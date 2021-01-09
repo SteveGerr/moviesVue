@@ -9,6 +9,7 @@
           :movie="listMovie"
           @mouseover.native="onMouseOver(listMovie.Poster)"
           @removeItem="onRemoveItem"
+          @showModal="onShowModal"
           ></MovieListItem>
         </BCol>
       </template>
@@ -16,18 +17,32 @@
           <div>Empty list</div>
       </template>
     </BRow>
+    <b-modal
+      body-class="movie-modal-body"
+      class="movie-modal"
+      :id="movieInfoModalId" size="xl"
+      hide-footer hide-header
+      title="BootstrapVue">
+      <MovieModalInfoContent :movie="selectMovie" @closeModal="onCloseModal" />
+    </b-modal>
   </b-container>
 </template>
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import MovieListItem from './MoviesListItem'
+import MovieModalInfoContent from './MovieModalInfoContent'
 
 export default {
   name: 'MoviesList',
   components: {
-    MovieListItem
+    MovieListItem,
+    MovieModalInfoContent
   },
+  data: () => ({
+    movieInfoModalId: 'modal-movie',
+    selectMovieId: ''
+  }),
   props: {
     list: {
       type: Object,
@@ -42,6 +57,10 @@ export default {
     // Проверяем есть ли список
     isExist () {
       return Boolean(Object.keys(this.list).length)
+    },
+    selectMovie () {
+      // Ежели ID есть, передаём в list
+      return this.selectMovieId ? this.list[this.selectMovieId] : null
     }
   },
 
@@ -55,6 +74,15 @@ export default {
       if (isConfirmed) {
         this.removeMovie(id)
       }
+    },
+    onShowModal (id) {
+      // Когда выбирают фильм, записываем его Id в дата selectMovieId
+      this.selectMovieId = id
+      this.$bvModal.show(this.movieInfoModalId)
+    },
+    onCloseModal () {
+      this.selectMovieId = null
+      this.$bvModal.hide(this.movieInfoModalId)
     }
   }
 }
@@ -65,4 +93,11 @@ export default {
   font-size: 50px;
   margin-bottom: 30px;
 }
+</style>
+
+<style>
+  .movie-modal-body {
+  padding: 0;
+}
+
 </style>
